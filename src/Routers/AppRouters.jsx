@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -22,19 +22,19 @@ import AdminDashboard from "../Dashboard/AdminDashboard";
 
 function AppRouters() {
   return (
-    <BrowserRouter>
+    <>
       <Navbar />
       <Routes>
-        <Route path="/"                    element={<Home />} />
-        <Route path="/about"               element={<About />} />
-        <Route path="/courses"             element={<Courses />} />
-        <Route path="/admission"           element={<Admission />} />
-        <Route path="/contact"             element={<Contact />} />
-        <Route path="/login"               element={<Login />} />
-        <Route path="/forgot-password"     element={<ForgotPassword />} />
-        <Route path="/privacy-policy"      element={<PrivacyPolicy />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/admission" element={<Admission />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-        <Route path="/faq"                 element={<FAQ />} />
+        <Route path="/faq" element={<FAQ />} />
 
         <Route
           path="/student-dashboard"
@@ -62,10 +62,10 @@ function AppRouters() {
         />
 
         <Route path="/home" element={<Navigate to="/" replace />} />
-        <Route path="*"     element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
-    </BrowserRouter>
+    </>
   );
 }
 

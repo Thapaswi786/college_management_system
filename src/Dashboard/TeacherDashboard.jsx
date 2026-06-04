@@ -1,289 +1,433 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PageTitle from "../components/PageTitle";
+import "../assets/css/TeacherDashboardcss.css";
 
-const MY_SUBJECTS = [
-  { code: "CSE-101", name: "Data Structures",    sem: "Sem 6", section: "B", students: 62 },
-  { code: "CSE-103", name: "Operating Systems",  sem: "Sem 6", section: "B", students: 62 },
-  { code: "CSE-201", name: "Algorithm Design",   sem: "Sem 4", section: "A", students: 58 },
-];
+function TeacherDashboard({ teacherName = "Prof. Johnson" }) {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-const SCHEDULE = [
-  { day: "Monday",    time: "8:30 AM",  subject: "Data Structures",  section: "6-B", room: "CS-201" },
-  { day: "Monday",    time: "10:30 AM", subject: "Operating Systems", section: "6-B", room: "CS-202" },
-  { day: "Tuesday",   time: "9:20 AM",  subject: "Algorithm Design",  section: "4-A", room: "CS-301" },
-  { day: "Wednesday", time: "8:30 AM",  subject: "Data Structures",  section: "6-B", room: "CS-201" },
-  { day: "Wednesday", time: "11:20 AM", subject: "Algorithm Design",  section: "4-A", room: "CS-301" },
-  { day: "Thursday",  time: "10:30 AM", subject: "Operating Systems", section: "6-B", room: "CS-202" },
-  { day: "Friday",    time: "9:20 AM",  subject: "Data Structures",  section: "6-B", room: "CS-201" },
-];
-
-const initialStudents = [
-  { id: "2022CSE031", name: "Harry Potter",        attend: true,  ct1: 26, ct2: 28 },
-  { id: "2022CSE032", name: "Hermione Granger",    attend: true,  ct1: 30, ct2: 30 },
-  { id: "2022CSE033", name: "Ron Weasley",         attend: false, ct1: 18, ct2: 20 },
-  { id: "2022CSE034", name: "Neville Longbottom",  attend: true,  ct1: 22, ct2: 24 },
-  { id: "2022CSE035", name: "Luna Lovegood",       attend: true,  ct1: 28, ct2: 27 },
-  { id: "2022CSE036", name: "Ginny Weasley",       attend: false, ct1: 24, ct2: 22 },
-];
-
-const ANNOUNCEMENTS = [
-  { date: "01 Jun 2026", text: "Internal Assessment II result upload deadline: 05 June 2026." },
-  { date: "28 May 2026", text: "Faculty Development Programme on AI in Education — 10 June 2026." },
-  { date: "20 May 2026", text: "End-semester exam duty allotment published. Check the examination cell notice." },
-  { date: "15 May 2026", text: "Research paper submission window for National Conference open till 30 May." },
-];
-
-const TABS = ["Overview", "My Subjects", "Schedule", "Attendance", "Marks Entry", "Announcements"];
-
-function TeacherDashboard() {
-  const [tab, setTab] = useState("Overview");
-  const [students, setStudents] = useState(initialStudents);
-  const [saved, setSaved] = useState("");
   const navigate = useNavigate();
-  const email = localStorage.getItem("userEmail") || "teacher@hogwarts.edu";
 
   const handleLogout = () => {
     localStorage.removeItem("role");
     localStorage.removeItem("userEmail");
+    localStorage.removeItem("loginData");
     navigate("/login");
   };
 
-  const toggleAttend = (id) => setStudents(students.map((s) => s.id === id ? { ...s, attend: !s.attend } : s));
+  const menuItems = [
+    { key: "overview", label: "Overview" },
+    { key: "classes", label: "My Classes" },
+    { key: "attendance", label: "Attendance" },
+    { key: "assignments", label: "Assignments" },
+    { key: "timetable", label: "Timetable" },
+    { key: "performance", label: "Performance" },
+    { key: "notices", label: "Notices" },
+    { key: "messages", label: "Messages" },
+    { key: "profile", label: "Profile" }
+  ];
 
-  const handleSave = (type) => {
-    setSaved(`${type} saved successfully!`);
-    setTimeout(() => setSaved(""), 2500);
+  const renderContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return (
+          <>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <h3>Total Classes</h3>
+                <p>5</p>
+                <span>Classes handled this semester</span>
+              </div>
+
+              <div className="stat-card">
+                <h3>Total Students</h3>
+                <p>186</p>
+                <span>Across all assigned sections</span>
+              </div>
+
+              <div className="stat-card">
+                <h3>Pending Reviews</h3>
+                <p>12</p>
+                <span>Assignments waiting for evaluation</span>
+              </div>
+
+              <div className="stat-card">
+                <h3>Attendance Updated</h3>
+                <p>93%</p>
+                <span>Class records updated this week</span>
+              </div>
+            </div>
+
+            <div className="content-grid">
+              <div className="dashboard-card">
+                <h3>Today’s Schedule</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Class</th>
+                      <th>Subject</th>
+                      <th>Room</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>09:00 AM</td>
+                      <td>III CSE A</td>
+                      <td>Data Structures</td>
+                      <td>Lab 2</td>
+                    </tr>
+                    <tr>
+                      <td>11:00 AM</td>
+                      <td>III CSE B</td>
+                      <td>Database Systems</td>
+                      <td>Room 204</td>
+                    </tr>
+                    <tr>
+                      <td>02:00 PM</td>
+                      <td>II IT A</td>
+                      <td>Web Technology</td>
+                      <td>Room 307</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="dashboard-card">
+                <h3>Recent Updates</h3>
+                <ul>
+                  <li>Internal assessment marks upload deadline is Friday.</li>
+                  <li>Faculty meeting scheduled for 10 June at 3:00 PM.</li>
+                  <li>Project viva timetable has been released.</li>
+                  <li>Attendance audit will begin next week.</li>
+                </ul>
+              </div>
+            </div>
+          </>
+        );
+
+      case "classes":
+        return (
+          <div className="dashboard-card">
+            <h3>My Classes</h3>
+            <div className="course-grid">
+              <div className="course-card">
+                <h4>III CSE A</h4>
+                <p>Data Structures and Lab guidance for 62 students.</p>
+              </div>
+              <div className="course-card">
+                <h4>III CSE B</h4>
+                <p>Database Systems with practical evaluation support.</p>
+              </div>
+              <div className="course-card">
+                <h4>II IT A</h4>
+                <p>Web Technology with frontend and backend modules.</p>
+              </div>
+              <div className="course-card">
+                <h4>II CSE A</h4>
+                <p>Operating Systems fundamentals and record assessments.</p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "attendance":
+        return (
+          <div className="dashboard-card">
+            <h3>Attendance Summary</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>Students</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                  <th>Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>III CSE A</td>
+                  <td>62</td>
+                  <td>58</td>
+                  <td>4</td>
+                  <td>94%</td>
+                </tr>
+                <tr>
+                  <td>III CSE B</td>
+                  <td>60</td>
+                  <td>55</td>
+                  <td>5</td>
+                  <td>92%</td>
+                </tr>
+                <tr>
+                  <td>II IT A</td>
+                  <td>64</td>
+                  <td>59</td>
+                  <td>5</td>
+                  <td>92%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case "assignments":
+        return (
+          <div className="dashboard-card">
+            <h3>Assignment Tracking</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>Assignment</th>
+                  <th>Due Date</th>
+                  <th>Submitted</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>III CSE A</td>
+                  <td>Tree Traversal Program</td>
+                  <td>06 Jun 2026</td>
+                  <td>54/62</td>
+                  <td className="status pending">Review Pending</td>
+                </tr>
+                <tr>
+                  <td>III CSE B</td>
+                  <td>SQL Joins Practice</td>
+                  <td>08 Jun 2026</td>
+                  <td>60/60</td>
+                  <td className="status submitted">Completed</td>
+                </tr>
+                <tr>
+                  <td>II IT A</td>
+                  <td>React Component Task</td>
+                  <td>10 Jun 2026</td>
+                  <td>49/64</td>
+                  <td className="status pending">Ongoing</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case "timetable":
+        return (
+          <div className="dashboard-card">
+            <h3>Weekly Timetable</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>9-10</th>
+                  <th>10-11</th>
+                  <th>11-12</th>
+                  <th>1-2</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Monday</td>
+                  <td>III CSE A</td>
+                  <td>III CSE B</td>
+                  <td>Free Hour</td>
+                  <td>II IT A</td>
+                </tr>
+                <tr>
+                  <td>Tuesday</td>
+                  <td>II CSE A</td>
+                  <td>III CSE A</td>
+                  <td>Meeting</td>
+                  <td>III CSE B</td>
+                </tr>
+                <tr>
+                  <td>Wednesday</td>
+                  <td>III CSE B</td>
+                  <td>II IT A</td>
+                  <td>Free Hour</td>
+                  <td>Lab</td>
+                </tr>
+                <tr>
+                  <td>Thursday</td>
+                  <td>III CSE A</td>
+                  <td>II CSE A</td>
+                  <td>III CSE B</td>
+                  <td>Project Review</td>
+                </tr>
+                <tr>
+                  <td>Friday</td>
+                  <td>II IT A</td>
+                  <td>III CSE A</td>
+                  <td>Seminar</td>
+                  <td>Lab</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case "performance":
+        return (
+          <div className="dashboard-card">
+            <h3>Class Performance</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>Average Mark</th>
+                  <th>Top Score</th>
+                  <th>Pass %</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>III CSE A</td>
+                  <td>78%</td>
+                  <td>96</td>
+                  <td>95%</td>
+                </tr>
+                <tr>
+                  <td>III CSE B</td>
+                  <td>81%</td>
+                  <td>98</td>
+                  <td>97%</td>
+                </tr>
+                <tr>
+                  <td>II IT A</td>
+                  <td>74%</td>
+                  <td>91</td>
+                  <td>89%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case "notices":
+        return (
+          <div className="dashboard-card">
+            <h3>Faculty Notices</h3>
+            <ul>
+              <li>NAAC documentation review starts this week.</li>
+              <li>Semester question paper submission due by 14 June.</li>
+              <li>Lab equipment audit scheduled for Saturday.</li>
+              <li>Mentor meeting reports must be submitted before Monday.</li>
+            </ul>
+          </div>
+        );
+
+      case "messages":
+        return (
+          <div className="dashboard-card">
+            <h3>Messages</h3>
+            <ul>
+              <li>Principal: Please finalize internal marks by this weekend.</li>
+              <li>HOD: Submit your course coverage report today.</li>
+              <li>Exam Cell: Hall arrangement duty list has been published.</li>
+              <li>Student Coordinator: Request for extra project guidance hour.</li>
+            </ul>
+          </div>
+        );
+
+      case "profile":
+        return (
+          <div className="dashboard-card">
+            <h3>Teacher Profile</h3>
+            <div className="profile-grid">
+              <div className="profile-item">
+                <span>Name</span>
+                <strong>{teacherName}</strong>
+              </div>
+              <div className="profile-item">
+                <span>Faculty ID</span>
+                <strong>TCH2026CSE021</strong>
+              </div>
+              <div className="profile-item">
+                <span>Department</span>
+                <strong>Computer Science and Engineering</strong>
+              </div>
+              <div className="profile-item">
+                <span>Designation</span>
+                <strong>Assistant Professor</strong>
+              </div>
+              <div className="profile-item">
+                <span>Email</span>
+                <strong>teacher@hogwartsuniversity.edu</strong>
+              </div>
+              <div className="profile-item">
+                <span>Cabin</span>
+                <strong>Block B - 203</strong>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="dashboard-card">
+            <h3>No Data</h3>
+            <p>No content available for this section.</p>
+          </div>
+        );
+    }
   };
 
   return (
-    <main className="page">
-      <PageTitle title="Teacher Dashboard" />
+    <div className="teacher-dashboard">
+      <button
+        type="button"
+        className="mobile-menu-btn"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        ☰
+      </button>
 
-      <div className="dashboard-top">
-        <div>
-          <h2>👨‍🏫 Teacher Dashboard</h2>
-          <p style={{ color: "var(--muted)", fontSize: "0.92rem" }}>
-            Welcome, <strong style={{ color: "var(--secondary)" }}>Prof. Remus Lupin</strong> — {email}
-          </p>
+      <aside className={`dashboard-sidebar ${sidebarOpen ? "show" : ""}`}>
+        <div className="sidebar-header">
+          <h2>Teacher Portal</h2>
+          <p>Hogwarts University</p>
         </div>
-        <button className="logout-btn" onClick={handleLogout}>Sign Out</button>
-      </div>
 
-      {/* Profile bar */}
-      <div className="dashboard-card" style={{ marginBottom: "24px", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "16px" }}>
-        {[
-          { label: "Employee ID",  value: "FAC-2018-047" },
-          { label: "Department",   value: "Computer Science" },
-          { label: "Designation",  value: "Associate Professor" },
-          { label: "Experience",   value: "8 Years" },
-        ].map(({ label, value }) => (
-          <div key={label}>
-            <p style={{ color: "var(--muted)", fontSize: "0.82rem", marginBottom: "4px" }}>{label}</p>
-            <p style={{ color: "var(--white)", fontWeight: "700" }}>{value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "24px" }}>
-        {TABS.map((t) => (
-          <button key={t} onClick={() => setTab(t)} style={{
-            padding: "9px 18px", borderRadius: "99px", border: "1px solid var(--border)",
-            background: tab === t ? "linear-gradient(135deg,var(--secondary-light),var(--secondary))" : "transparent",
-            color: tab === t ? "#111827" : "var(--muted)", cursor: "pointer",
-            fontWeight: tab === t ? "700" : "400", transition: "0.2s"
-          }}>{t}</button>
-        ))}
-      </div>
-
-      {saved && <div className="alert alert-success" style={{ marginBottom: "18px" }}>✅ {saved}</div>}
-
-      {/* Overview */}
-      {tab === "Overview" && (
-        <div>
-          <div className="dashboard-grid" style={{ marginBottom: "22px" }}>
-            {[
-              { label: "Subjects Handling", value: "3",   icon: "📚" },
-              { label: "Total Students",    value: "182", icon: "🎓" },
-              { label: "Classes Today",     value: "2",   icon: "📅" },
-              { label: "Avg. Attendance",   value: "72%", icon: "📊" },
-              { label: "Marks Pending",     value: "1",   icon: "✏️" },
-              { label: "Leave Balance",     value: "12",  icon: "🗓️" },
-            ].map(({ label, value, icon }) => (
-              <div className="dashboard-card" key={label}>
-                <p style={{ fontSize: "1.6rem" }}>{icon}</p>
-                <div className="stat-number">{value}</div>
-                <p style={{ color: "var(--muted)", fontSize: "0.88rem" }}>{label}</p>
-              </div>
-            ))}
-          </div>
-          <div className="dashboard-card">
-            <h3 style={{ marginBottom: "14px" }}>📢 Announcements</h3>
-            {ANNOUNCEMENTS.slice(0, 3).map((a, i) => (
-              <div key={i} style={{ paddingBottom: "12px", marginBottom: "12px", borderBottom: i < 2 ? "1px solid var(--border)" : "none" }}>
-                <span style={{ color: "var(--secondary)", fontSize: "0.8rem", fontWeight: "600" }}>{a.date} — </span>
-                <span style={{ color: "var(--muted)", fontSize: "0.92rem" }}>{a.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* My Subjects */}
-      {tab === "My Subjects" && (
-        <div className="dashboard-card">
-          <h3 style={{ marginBottom: "20px" }}>📚 Subjects Assigned — 2025–26 (Even Sem)</h3>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>{["Code", "Subject Name", "Semester", "Section", "Students"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {MY_SUBJECTS.map((s) => (
-                  <tr key={s.code}>
-                    <td style={{ ...tdStyle, color: "var(--secondary)", fontWeight: "700" }}>{s.code}</td>
-                    <td style={{ ...tdStyle, color: "var(--white)" }}>{s.name}</td>
-                    <td style={tdStyle}>{s.sem}</td>
-                    <td style={tdStyle}>{s.section}</td>
-                    <td style={tdStyle}>{s.students}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Schedule */}
-      {tab === "Schedule" && (
-        <div className="dashboard-card">
-          <h3 style={{ marginBottom: "20px" }}>🗓️ Weekly Teaching Schedule</h3>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>{["Day", "Time", "Subject", "Section", "Room"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {SCHEDULE.map((row, i) => (
-                  <tr key={i}>
-                    <td style={{ ...tdStyle, color: "var(--secondary)", fontWeight: "700" }}>{row.day}</td>
-                    <td style={{ ...tdStyle, color: "var(--white)" }}>{row.time}</td>
-                    <td style={tdStyle}>{row.subject}</td>
-                    <td style={tdStyle}>{row.section}</td>
-                    <td style={tdStyle}>{row.room}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Attendance */}
-      {tab === "Attendance" && (
-        <div className="dashboard-card">
-          <h3 style={{ marginBottom: "6px" }}>📋 Mark Attendance</h3>
-          <p style={{ color: "var(--muted)", fontSize: "0.88rem", marginBottom: "20px" }}>
-            Data Structures — Sem 6 / Section B — {new Date().toLocaleDateString("en-IN", { day:"numeric", month:"long", year:"numeric" })}
-          </p>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>{["Reg. No.", "Student Name", "Status", "Toggle"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {students.map((s) => (
-                  <tr key={s.id}>
-                    <td style={{ ...tdStyle, color: "var(--secondary)", fontWeight: "700" }}>{s.id}</td>
-                    <td style={{ ...tdStyle, color: "var(--white)" }}>{s.name}</td>
-                    <td style={{ ...tdStyle, color: s.attend ? "var(--success)" : "var(--danger)", fontWeight: "700" }}>
-                      {s.attend ? "✅ Present" : "❌ Absent"}
-                    </td>
-                    <td style={tdStyle}>
-                      <button onClick={() => toggleAttend(s.id)} style={{
-                        padding: "6px 14px", borderRadius: "99px", border: "1px solid var(--border)",
-                        background: "transparent", color: "var(--muted)", cursor: "pointer", fontSize: "0.84rem"
-                      }}>
-                        Toggle
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <button className="main-btn" style={{ marginTop: "18px", maxWidth: "220px" }} onClick={() => handleSave("Attendance")}>
-            Save Attendance
-          </button>
-        </div>
-      )}
-
-      {/* Marks Entry */}
-      {tab === "Marks Entry" && (
-        <div className="dashboard-card">
-          <h3 style={{ marginBottom: "6px" }}>✏️ Internal Marks Entry</h3>
-          <p style={{ color: "var(--muted)", fontSize: "0.88rem", marginBottom: "20px" }}>
-            Data Structures — Sem 6 / Section B
-          </p>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>{["Reg. No.", "Student Name", "CT 1 (/30)", "CT 2 (/30)"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {students.map((s) => (
-                  <tr key={s.id}>
-                    <td style={{ ...tdStyle, color: "var(--secondary)", fontWeight: "700" }}>{s.id}</td>
-                    <td style={{ ...tdStyle, color: "var(--white)" }}>{s.name}</td>
-                    {["ct1", "ct2"].map((key) => (
-                      <td key={key} style={tdStyle}>
-                        <input
-                          type="number" min="0" max="30" value={s[key]}
-                          onChange={(e) => setStudents(students.map((st) => st.id === s.id ? { ...st, [key]: Number(e.target.value) } : st))}
-                          style={{
-                            width: "70px", padding: "6px 10px", borderRadius: "10px",
-                            border: "1px solid var(--border)", background: "rgba(255,255,255,0.07)",
-                            color: "var(--white)", outline: "none"
-                          }}
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <button className="main-btn" style={{ marginTop: "18px", maxWidth: "220px" }} onClick={() => handleSave("Marks")}>
-            Save Marks
-          </button>
-        </div>
-      )}
-
-      {/* Announcements */}
-      {tab === "Announcements" && (
-        <div className="dashboard-card">
-          <h3 style={{ marginBottom: "20px" }}>📢 Department Announcements</h3>
-          {ANNOUNCEMENTS.map((a, i) => (
-            <div key={i} style={{ padding: "14px 0", borderBottom: i < ANNOUNCEMENTS.length - 1 ? "1px solid var(--border)" : "none" }}>
-              <span style={{ color: "var(--secondary)", fontSize: "0.82rem", fontWeight: "700" }}>{a.date}</span>
-              <p style={{ color: "var(--muted)", marginTop: "4px", lineHeight: "1.65" }}>{a.text}</p>
-            </div>
+        <nav className="sidebar-nav">
+          {menuItems.map((item) => (
+            <button
+              type="button"
+              key={item.key}
+              className={activeTab === item.key ? "active" : ""}
+              onClick={() => {
+                setActiveTab(item.key);
+                setSidebarOpen(false);
+              }}
+            >
+              {item.label}
+            </button>
           ))}
-        </div>
-      )}
-    </main>
+        </nav>
+      </aside>
+
+      <main className="dashboard-main">
+        <header className="dashboard-topbar">
+          <div>
+            <h1>Teacher Dashboard</h1>
+            <p>Welcome back, {teacherName}</p>
+          </div>
+
+          <div className="topbar-right">
+            <input type="text" placeholder="Search..." />
+            <button type="button" className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        </header>
+
+        <section className="dashboard-content">
+          {renderContent()}
+        </section>
+      </main>
+    </div>
   );
 }
-
-const thStyle = {
-  padding: "11px 14px", textAlign: "left",
-  borderBottom: "2px solid var(--border)", color: "var(--secondary)",
-  fontSize: "0.82rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px"
-};
-const tdStyle = {
-  padding: "11px 14px", color: "var(--muted)",
-  borderBottom: "1px solid rgba(255,255,255,0.05)"
-};
 
 export default TeacherDashboard;

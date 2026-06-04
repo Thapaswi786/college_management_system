@@ -6,7 +6,7 @@ function Navbar() {
     <header>
       <div className="navbar">
         <div className="brand">
-          <h1>🎓 Hogwarts University</h1>
+          <h1> Hogwarts University</h1>
           <p>Engineering College Management Portal</p>
         </div>
         <nav className="nav-links">

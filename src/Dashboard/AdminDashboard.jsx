@@ -1,354 +1,453 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PageTitle from "../components/PageTitle";
+import "../assets/css/Admincss.css";
 
-const STUDENTS = [
-  { id: "2022CSE031", name: "Harry Potter",        dept: "CSE", sem: 6, status: "Active" },
-  { id: "2022CSE032", name: "Hermione Granger",    dept: "CSE", sem: 6, status: "Active" },
-  { id: "2022CSE033", name: "Ron Weasley",         dept: "CSE", sem: 6, status: "Active" },
-  { id: "2022ECE041", name: "Draco Malfoy",        dept: "ECE", sem: 4, status: "Active" },
-  { id: "2022EEE021", name: "Neville Longbottom",  dept: "EEE", sem: 4, status: "Inactive" },
-  { id: "2021MECH11", name: "Luna Lovegood",       dept: "MECH",sem: 6, status: "Active" },
-  { id: "2023IT001",  name: "Ginny Weasley",       dept: "IT",  sem: 2, status: "Active" },
-];
+function AdminDashboard({ adminName = "Administrator" }) {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-const FACULTY = [
-  { id: "FAC-2018-047", name: "Prof. Remus Lupin",        dept: "CSE",  designation: "Associate Professor", status: "Active" },
-  { id: "FAC-2015-022", name: "Prof. Pomona Sprout",      dept: "EEE",  designation: "Professor",           status: "Active" },
-  { id: "FAC-2020-063", name: "Prof. Filius Flitwick",    dept: "ECE",  designation: "Assistant Professor", status: "Active" },
-  { id: "FAC-2019-034", name: "Dr. Sybill Trelawney",     dept: "MECH", designation: "Associate Professor", status: "On Leave" },
-  { id: "FAC-2021-078", name: "Prof. Rubeus Hagrid",      dept: "IT",   designation: "Assistant Professor", status: "Active" },
-];
-
-const FEES_REPORT = [
-  { dept: "CSE",  collected: "₹48,60,000", pending: "₹12,60,000", total: "₹61,20,000" },
-  { dept: "ECE",  collected: "₹22,50,000", pending: "₹8,10,000",  total: "₹30,60,000" },
-  { dept: "EEE",  collected: "₹20,70,000", pending: "₹9,00,000",  total: "₹29,70,000" },
-  { dept: "MECH", collected: "₹19,80,000", pending: "₹7,20,000",  total: "₹27,00,000" },
-  { dept: "IT",   collected: "₹21,60,000", pending: "₹8,40,000",  total: "₹30,00,000" },
-];
-
-const NOTICES = [
-  { id: 1, title: "End-Semester Exam Timetable Published",  date: "01 Jun 2026", audience: "All" },
-  { id: 2, title: "Fee Payment Deadline — Semester 6",      date: "28 May 2026", audience: "Students" },
-  { id: 3, title: "Faculty Development Programme — June 10",date: "25 May 2026", audience: "Faculty" },
-  { id: 4, title: "Anti-Ragging Committee Meeting",         date: "20 May 2026", audience: "Admin" },
-  { id: 5, title: "NAAC Peer Team Visit — Preparation Note",date: "15 May 2026", audience: "Faculty" },
-];
-
-const TABS = ["Overview", "Students", "Faculty", "Fees Report", "Notice Board", "System"];
-
-function AdminDashboard() {
-  const [tab, setTab]         = useState("Overview");
-  const [search, setSearch]   = useState("");
-  const [noticeForm, setNoticeForm] = useState({ title: "", audience: "All", message: "" });
-  const [notices, setNotices] = useState(NOTICES);
-  const [msg, setMsg]         = useState("");
   const navigate = useNavigate();
-  const email = localStorage.getItem("userEmail") || "admin@hogwarts.edu";
 
   const handleLogout = () => {
     localStorage.removeItem("role");
     localStorage.removeItem("userEmail");
+    localStorage.removeItem("loginData");
     navigate("/login");
   };
 
-  const filteredStudents = STUDENTS.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase()) ||
-    s.id.toLowerCase().includes(search.toLowerCase()) ||
-    s.dept.toLowerCase().includes(search.toLowerCase())
-  );
+  const menuItems = [
+    { key: "overview", label: "Overview" },
+    { key: "students", label: "Students" },
+    { key: "teachers", label: "Teachers" },
+    { key: "departments", label: "Departments" },
+    { key: "fees", label: "Fees" },
+    { key: "exams", label: "Exams" },
+    { key: "notices", label: "Notices" },
+    { key: "reports", label: "Reports" },
+    { key: "profile", label: "Profile" }
+  ];
 
-  const handlePublish = (e) => {
-    e.preventDefault();
-    if (!noticeForm.title.trim() || !noticeForm.message.trim()) { setMsg("error"); return; }
-    const newNotice = {
-      id: notices.length + 1,
-      title: noticeForm.title,
-      date: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
-      audience: noticeForm.audience,
-    };
-    setNotices([newNotice, ...notices]);
-    setNoticeForm({ title: "", audience: "All", message: "" });
-    setMsg("success");
-    setTimeout(() => setMsg(""), 2500);
-  };
-
-  return (
-    <main className="page">
-      <PageTitle title="Admin Dashboard" />
-
-      <div className="dashboard-top">
-        <div>
-          <h2>🛡️ Admin Dashboard</h2>
-          <p style={{ color: "var(--muted)", fontSize: "0.92rem" }}>
-            Welcome, <strong style={{ color: "var(--secondary)" }}>Admin</strong> — {email}
-          </p>
-        </div>
-        <button className="logout-btn" onClick={handleLogout}>Sign Out</button>
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "24px" }}>
-        {TABS.map((t) => (
-          <button key={t} onClick={() => setTab(t)} style={{
-            padding: "9px 18px", borderRadius: "99px", border: "1px solid var(--border)",
-            background: tab === t ? "linear-gradient(135deg,var(--secondary-light),var(--secondary))" : "transparent",
-            color: tab === t ? "#111827" : "var(--muted)", cursor: "pointer",
-            fontWeight: tab === t ? "700" : "400", transition: "0.2s"
-          }}>{t}</button>
-        ))}
-      </div>
-
-      {/* Overview */}
-      {tab === "Overview" && (
-        <div>
-          <div className="dashboard-grid" style={{ marginBottom: "22px" }}>
-            {[
-              { label: "Total Students",    value: "3,840", icon: "🎓" },
-              { label: "Total Faculty",     value: "148",   icon: "👨‍🏫" },
-              { label: "Departments",       value: "10",    icon: "🏫" },
-              { label: "Active Courses",    value: "9",     icon: "📚" },
-              { label: "Fees Collected",    value: "₹1.33 Cr", icon: "💰" },
-              { label: "Pending Fees",      value: "₹45.3 L",  icon: "⚠️" },
-            ].map(({ label, value, icon }) => (
-              <div className="dashboard-card" key={label}>
-                <p style={{ fontSize: "1.6rem" }}>{icon}</p>
-                <div className="stat-number" style={{ fontSize: "1.8rem" }}>{value}</div>
-                <p style={{ color: "var(--muted)", fontSize: "0.88rem" }}>{label}</p>
+  const renderContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return (
+          <>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <h3>Total Students</h3>
+                <p>2,486</p>
+                <span>Currently enrolled students</span>
               </div>
-            ))}
-          </div>
 
-          <div className="grid-2">
-            <div className="dashboard-card">
-              <h3 style={{ marginBottom: "14px" }}>🏫 Dept-wise Strength</h3>
-              {[
-                { dept: "CSE",  count: 960, pct: 25 },
-                { dept: "ECE",  count: 720, pct: 19 },
-                { dept: "EEE",  count: 600, pct: 16 },
-                { dept: "MECH", count: 600, pct: 16 },
-                { dept: "IT",   count: 480, pct: 13 },
-                { dept: "Other",count: 480, pct: 11 },
-              ].map((d) => (
-                <div key={d.dept} style={{ marginBottom: "10px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.88rem", color: "var(--muted)", marginBottom: "4px" }}>
-                    <span>{d.dept}</span><span>{d.count} students</span>
-                  </div>
-                  <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: "99px", height: "7px" }}>
-                    <div style={{ width: `${d.pct * 4}%`, height: "100%", borderRadius: "99px", background: "linear-gradient(90deg,var(--secondary-light),var(--secondary))" }} />
-                  </div>
-                </div>
-              ))}
+              <div className="stat-card">
+                <h3>Total Teachers</h3>
+                <p>148</p>
+                <span>Active faculty members</span>
+              </div>
+
+              <div className="stat-card">
+                <h3>Departments</h3>
+                <p>12</p>
+                <span>Academic departments managed</span>
+              </div>
+
+              <div className="stat-card">
+                <h3>Pending Approvals</h3>
+                <p>27</p>
+                <span>Requests awaiting admin action</span>
+              </div>
             </div>
-            <div className="dashboard-card">
-              <h3 style={{ marginBottom: "14px" }}>📢 Recent Notices</h3>
-              {notices.slice(0, 4).map((n, i) => (
-                <div key={n.id} style={{ paddingBottom: "11px", marginBottom: "11px", borderBottom: i < 3 ? "1px solid var(--border)" : "none" }}>
-                  <span style={{ color: "var(--secondary)", fontSize: "0.78rem", fontWeight: "600" }}>{n.date} • {n.audience}</span>
-                  <p style={{ color: "var(--muted)", fontSize: "0.9rem", marginTop: "2px" }}>{n.title}</p>
-                </div>
-              ))}
+
+            <div className="content-grid">
+              <div className="dashboard-card">
+                <h3>Recent Activities</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Activity</th>
+                      <th>User</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>09:15 AM</td>
+                      <td>Student admission approved</td>
+                      <td>Admin Office</td>
+                      <td className="status approved">Completed</td>
+                    </tr>
+                    <tr>
+                      <td>10:40 AM</td>
+                      <td>Faculty attendance updated</td>
+                      <td>HR Team</td>
+                      <td className="status approved">Completed</td>
+                    </tr>
+                    <tr>
+                      <td>12:00 PM</td>
+                      <td>Fee payment pending review</td>
+                      <td>Accounts</td>
+                      <td className="status pending">Pending</td>
+                    </tr>
+                    <tr>
+                      <td>01:30 PM</td>
+                      <td>Exam hall allocation submitted</td>
+                      <td>Exam Cell</td>
+                      <td className="status approved">Completed</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="dashboard-card">
+                <h3>Quick Updates</h3>
+                <ul>
+                  <li>Semester fee reconciliation closes on Friday.</li>
+                  <li>Exam seating plan review is scheduled tomorrow.</li>
+                  <li>Department audit reports are due this week.</li>
+                  <li>Staff meeting starts at 4:00 PM in the seminar hall.</li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        );
 
-      {/* Students */}
-      {tab === "Students" && (
-        <div className="dashboard-card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", flexWrap: "wrap", gap: "12px" }}>
-            <h3>🎓 Student Management</h3>
-            <input
-              type="text" placeholder="Search by name, ID, or dept…"
-              value={search} onChange={(e) => setSearch(e.target.value)}
-              style={{ padding: "9px 14px", borderRadius: "12px", border: "1px solid var(--border)", background: "rgba(255,255,255,0.07)", color: "var(--white)", outline: "none", minWidth: "240px" }}
-            />
-          </div>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      case "students":
+        return (
+          <div className="dashboard-card">
+            <h3>Student Management</h3>
+            <table>
               <thead>
-                <tr>{["Reg. No.", "Name", "Department", "Semester", "Status", "Action"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
+                <tr>
+                  <th>Department</th>
+                  <th>Students</th>
+                  <th>New Admissions</th>
+                  <th>Attendance Avg</th>
+                </tr>
               </thead>
               <tbody>
-                {filteredStudents.map((s) => (
-                  <tr key={s.id}>
-                    <td style={{ ...tdStyle, color: "var(--secondary)", fontWeight: "700" }}>{s.id}</td>
-                    <td style={{ ...tdStyle, color: "var(--white)" }}>{s.name}</td>
-                    <td style={tdStyle}>{s.dept}</td>
-                    <td style={tdStyle}>{s.sem}</td>
-                    <td style={{ ...tdStyle, color: s.status === "Active" ? "var(--success)" : "var(--danger)", fontWeight: "600" }}>
-                      {s.status === "Active" ? "● Active" : "● Inactive"}
-                    </td>
-                    <td style={tdStyle}>
-                      <button style={{ padding: "5px 12px", borderRadius: "8px", border: "1px solid var(--border)", background: "transparent", color: "var(--secondary)", cursor: "pointer", fontSize: "0.82rem" }}>
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p style={{ color: "var(--muted)", fontSize: "0.82rem", marginTop: "14px" }}>
-            Showing {filteredStudents.length} of {STUDENTS.length} records.
-          </p>
-        </div>
-      )}
-
-      {/* Faculty */}
-      {tab === "Faculty" && (
-        <div className="dashboard-card">
-          <h3 style={{ marginBottom: "20px" }}>👨‍🏫 Faculty Management</h3>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>{["Emp. ID", "Name", "Department", "Designation", "Status"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {FACULTY.map((f) => (
-                  <tr key={f.id}>
-                    <td style={{ ...tdStyle, color: "var(--secondary)", fontWeight: "700" }}>{f.id}</td>
-                    <td style={{ ...tdStyle, color: "var(--white)" }}>{f.name}</td>
-                    <td style={tdStyle}>{f.dept}</td>
-                    <td style={tdStyle}>{f.designation}</td>
-                    <td style={{ ...tdStyle, color: f.status === "Active" ? "var(--success)" : "var(--secondary)", fontWeight: "600" }}>
-                      {f.status === "Active" ? "● Active" : "● " + f.status}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Fees Report */}
-      {tab === "Fees Report" && (
-        <div className="dashboard-card">
-          <h3 style={{ marginBottom: "20px" }}>💰 Fee Collection Report — AY 2025–26</h3>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>{["Department", "Collected", "Pending", "Total"].map((h) => <th key={h} style={thStyle}>{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {FEES_REPORT.map((row) => (
-                  <tr key={row.dept}>
-                    <td style={{ ...tdStyle, color: "var(--secondary)", fontWeight: "700" }}>{row.dept}</td>
-                    <td style={{ ...tdStyle, color: "var(--success)", fontWeight: "600" }}>{row.collected}</td>
-                    <td style={{ ...tdStyle, color: "var(--danger)",  fontWeight: "600" }}>{row.pending}</td>
-                    <td style={{ ...tdStyle, color: "var(--white)",   fontWeight: "700" }}>{row.total}</td>
-                  </tr>
-                ))}
-                <tr style={{ background: "rgba(212,175,55,0.08)" }}>
-                  <td style={{ ...tdStyle, color: "var(--secondary)", fontWeight: "800" }}>TOTAL</td>
-                  <td style={{ ...tdStyle, color: "var(--success)", fontWeight: "800" }}>₹1,33,20,000</td>
-                  <td style={{ ...tdStyle, color: "var(--danger)",  fontWeight: "800" }}>₹45,30,000</td>
-                  <td style={{ ...tdStyle, color: "var(--white)",   fontWeight: "800" }}>₹1,78,50,000</td>
+                <tr>
+                  <td>CSE</td>
+                  <td>620</td>
+                  <td>84</td>
+                  <td>91%</td>
+                </tr>
+                <tr>
+                  <td>IT</td>
+                  <td>470</td>
+                  <td>63</td>
+                  <td>89%</td>
+                </tr>
+                <tr>
+                  <td>ECE</td>
+                  <td>510</td>
+                  <td>58</td>
+                  <td>88%</td>
+                </tr>
+                <tr>
+                  <td>MECH</td>
+                  <td>390</td>
+                  <td>45</td>
+                  <td>86%</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        );
 
-      {/* Notice Board */}
-      {tab === "Notice Board" && (
-        <div className="grid-2">
+      case "teachers":
+        return (
           <div className="dashboard-card">
-            <h3 style={{ marginBottom: "20px" }}>📋 Published Notices</h3>
-            {notices.map((n, i) => (
-              <div key={n.id} style={{ paddingBottom: "14px", marginBottom: "14px", borderBottom: i < notices.length - 1 ? "1px solid var(--border)" : "none" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
-                  <div>
-                    <span style={{ color: "var(--secondary)", fontSize: "0.78rem", fontWeight: "600" }}>{n.date} • {n.audience}</span>
-                    <p style={{ color: "var(--white)", marginTop: "3px", fontWeight: "600", fontSize: "0.93rem" }}>{n.title}</p>
-                  </div>
-                  <button
-                    onClick={() => setNotices(notices.filter((x) => x.id !== n.id))}
-                    style={{ padding: "4px 10px", borderRadius: "8px", border: "1px solid rgba(239,68,68,0.4)", background: "transparent", color: "#fca5a5", cursor: "pointer", fontSize: "0.8rem", flexShrink: 0 }}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+            <h3>Teacher Management</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th>Faculty Count</th>
+                  <th>Present Today</th>
+                  <th>Leaves</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>CSE</td>
+                  <td>32</td>
+                  <td>30</td>
+                  <td>2</td>
+                </tr>
+                <tr>
+                  <td>IT</td>
+                  <td>24</td>
+                  <td>22</td>
+                  <td>2</td>
+                </tr>
+                <tr>
+                  <td>ECE</td>
+                  <td>28</td>
+                  <td>27</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>MECH</td>
+                  <td>21</td>
+                  <td>20</td>
+                  <td>1</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+        );
 
+      case "departments":
+        return (
           <div className="dashboard-card">
-            <h3 style={{ marginBottom: "20px" }}>✏️ Publish New Notice</h3>
-            {msg === "success" && <div className="alert alert-success">✅ Notice published successfully!</div>}
-            {msg === "error"   && <div className="alert alert-error">❌ Title and message are required.</div>}
-            <form onSubmit={handlePublish} noValidate>
-              <div className="form-group">
-                <label>Notice Title</label>
-                <input type="text" value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="Enter notice title" />
+            <h3>Departments</h3>
+            <div className="course-grid">
+              <div className="course-card">
+                <h4>Computer Science</h4>
+                <p>Strong academic performance with high project participation.</p>
               </div>
-              <div className="form-group">
-                <label>Audience</label>
-                <select value={noticeForm.audience} onChange={(e) => setNoticeForm({ ...noticeForm, audience: e.target.value })}>
-                  <option>All</option>
-                  <option>Students</option>
-                  <option>Faculty</option>
-                  <option>Admin</option>
-                </select>
+              <div className="course-card">
+                <h4>Information Technology</h4>
+                <p>Good placement record and active technical clubs.</p>
               </div>
-              <div className="form-group">
-                <label>Message</label>
-                <textarea value={noticeForm.message} onChange={(e) => setNoticeForm({ ...noticeForm, message: e.target.value })} rows="4" placeholder="Enter notice content…"
-                  style={{ width:"100%", padding:"13px 15px", borderRadius:"14px", border:"1px solid var(--border)", background:"rgba(255,255,255,0.07)", color:"var(--white)", outline:"none", resize:"vertical" }} />
+              <div className="course-card">
+                <h4>Electronics & Communication</h4>
+                <p>Consistent results with ongoing lab upgrades.</p>
               </div>
-              <button type="submit" className="main-btn">Publish Notice</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* System */}
-      {tab === "System" && (
-        <div className="grid-2">
-          {[
-            { title: "🖥️ Portal Status", items: [
-              { label: "Application Server",  val: "✅ Online" },
-              { label: "Database Server",     val: "✅ Online" },
-              { label: "Email Service",       val: "✅ Online" },
-              { label: "Backup Service",      val: "✅ Online" },
-              { label: "Last Backup",         val: "02 Jun 2026, 02:00 AM" },
-              { label: "SSL Certificate",     val: "Valid till Dec 2026" },
-            ]},
-            { title: "📊 System Usage", items: [
-              { label: "Active Sessions",    val: "247" },
-              { label: "DB Queries / Hour",  val: "18,420" },
-              { label: "Storage Used",       val: "48 GB / 200 GB" },
-              { label: "Bandwidth Today",    val: "12.4 GB" },
-              { label: "Uptime",             val: "99.97%" },
-              { label: "Portal Version",     val: "v2.4.1" },
-            ]},
-          ].map((card) => (
-            <div className="dashboard-card" key={card.title}>
-              <h3 style={{ marginBottom: "18px" }}>{card.title}</h3>
-              {card.items.map(({ label, val }) => (
-                <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                  <span style={{ color: "var(--muted)", fontSize: "0.9rem" }}>{label}</span>
-                  <span style={{ color: "var(--white)", fontWeight: "600", fontSize: "0.9rem" }}>{val}</span>
-                </div>
-              ))}
+              <div className="course-card">
+                <h4>Mechanical Engineering</h4>
+                <p>Industry training activities scheduled for this month.</p>
+              </div>
             </div>
-          ))}
+          </div>
+        );
+
+      case "fees":
+        return (
+          <div className="dashboard-card">
+            <h3>Fee Collection Status</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th>Total Due</th>
+                  <th>Collected</th>
+                  <th>Pending</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>CSE</td>
+                  <td>₹48,00,000</td>
+                  <td>₹44,20,000</td>
+                  <td>₹3,80,000</td>
+                  <td className="status pending">In Progress</td>
+                </tr>
+                <tr>
+                  <td>IT</td>
+                  <td>₹35,00,000</td>
+                  <td>₹33,10,000</td>
+                  <td>₹1,90,000</td>
+                  <td className="status approved">Healthy</td>
+                </tr>
+                <tr>
+                  <td>ECE</td>
+                  <td>₹39,00,000</td>
+                  <td>₹36,50,000</td>
+                  <td>₹2,50,000</td>
+                  <td className="status pending">Follow-up</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case "exams":
+        return (
+          <div className="dashboard-card">
+            <h3>Exam Administration</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Exam</th>
+                  <th>Date</th>
+                  <th>Departments</th>
+                  <th>Hall Allocation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Mid Semester</td>
+                  <td>12 Jun 2026</td>
+                  <td>All UG</td>
+                  <td>Completed</td>
+                </tr>
+                <tr>
+                  <td>Lab Practical</td>
+                  <td>18 Jun 2026</td>
+                  <td>CSE, IT, ECE</td>
+                  <td>In Progress</td>
+                </tr>
+                <tr>
+                  <td>Internal Review</td>
+                  <td>22 Jun 2026</td>
+                  <td>Final Year</td>
+                  <td>Pending</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case "notices":
+        return (
+          <div className="dashboard-card">
+            <h3>Administrative Notices</h3>
+            <ul>
+              <li>University inspection team will visit next Monday.</li>
+              <li>Department budget submissions are due by 15 June.</li>
+              <li>Hostel maintenance requests must be cleared this week.</li>
+              <li>Transport route revision meeting is scheduled tomorrow.</li>
+            </ul>
+          </div>
+        );
+
+      case "reports":
+        return (
+          <div className="dashboard-card">
+            <h3>Reports Overview</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Report</th>
+                  <th>Owner</th>
+                  <th>Updated On</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Attendance Summary</td>
+                  <td>Academic Office</td>
+                  <td>03 Jun 2026</td>
+                  <td className="status approved">Ready</td>
+                </tr>
+                <tr>
+                  <td>Fee Collection Report</td>
+                  <td>Accounts</td>
+                  <td>03 Jun 2026</td>
+                  <td className="status approved">Ready</td>
+                </tr>
+                <tr>
+                  <td>Faculty Workload Report</td>
+                  <td>HR Cell</td>
+                  <td>02 Jun 2026</td>
+                  <td className="status pending">Updating</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case "profile":
+        return (
+          <div className="dashboard-card">
+            <h3>Admin Profile</h3>
+            <div className="profile-grid">
+              <div className="profile-item">
+                <span>Name</span>
+                <strong>{adminName}</strong>
+              </div>
+              <div className="profile-item">
+                <span>Admin ID</span>
+                <strong>ADM2026UNI001</strong>
+              </div>
+              <div className="profile-item">
+                <span>Role</span>
+                <strong>System Administrator</strong>
+              </div>
+              <div className="profile-item">
+                <span>Department</span>
+                <strong>Administration</strong>
+              </div>
+              <div className="profile-item">
+                <span>Email</span>
+                <strong>admin@hogwartsuniversity.edu</strong>
+              </div>
+              <div className="profile-item">
+                <span>Office</span>
+                <strong>Main Block - A101</strong>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="dashboard-card">
+            <h3>No Data</h3>
+            <p>No content available for this section.</p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="admin-dashboard">
+      <button
+        type="button"
+        className="mobile-menu-btn"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        ☰
+      </button>
+
+      <aside className={`dashboard-sidebar ${sidebarOpen ? "show" : ""}`}>
+        <div className="sidebar-header">
+          <h2>Admin Portal</h2>
+          <p>Hogwarts University</p>
         </div>
-      )}
-    </main>
+
+        <nav className="sidebar-nav">
+          {menuItems.map((item) => (
+            <button
+              type="button"
+              key={item.key}
+              className={activeTab === item.key ? "active" : ""}
+              onClick={() => {
+                setActiveTab(item.key);
+                setSidebarOpen(false);
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+      </aside>
+
+      <main className="dashboard-main">
+        <header className="dashboard-topbar">
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p>Welcome back, {adminName}</p>
+          </div>
+
+          <div className="topbar-right">
+            <input type="text" placeholder="Search..." />
+            <button type="button" className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        </header>
+
+        <section className="dashboard-content">
+          {renderContent()}
+        </section>
+      </main>
+    </div>
   );
 }
-
-const thStyle = {
-  padding: "11px 14px", textAlign: "left",
-  borderBottom: "2px solid var(--border)", color: "var(--secondary)",
-  fontSize: "0.82rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px"
-};
-const tdStyle = {
-  padding: "11px 14px", color: "var(--muted)",
-  borderBottom: "1px solid rgba(255,255,255,0.05)"
-};
 
 export default AdminDashboard;
